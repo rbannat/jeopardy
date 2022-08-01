@@ -1,6 +1,6 @@
 # Jeopardy for team meetings
 
-A Jeopardy clone for team meetings built with Svelte and Svelte Kit.
+A Jeopardy clone for team meetings built with Svelte and SvelteKit.
 
 ## Developing
 
@@ -24,3 +24,16 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
+## Using a Google Spreadsheet to manage questions and answers content
+
+1. [Create a Google Cloud Project](https://developers.google.com/workspace/guides/create-project)
+2. [Enable Spreadsheet API](https://developers.google.com/workspace/guides/enable-apis)
+3. [Create a service account and access credentials](https://developers.google.com/workspace/guides/create-credentials#service-account)
+4. Copy [spreadsheet template](https://docs.google.com/spreadsheets/d/11pW5DrMpTZKJ5i2pA_bm6W85bvihNHPVO0BpuNyanoE/)
+5. Share copied spreadsheet with created service account
+6. Create `.env` file and add credentials
+
+   ```sh
+   mv .env.example .env
+   ```
