@@ -1,29 +1,23 @@
-import { auth } from '$lib/auth';
+import { auth } from '$lib/api/auth';
+import { getSpreadsheet } from '$lib/api/get-spreadsheet';
+import type { Credentials } from 'google-auth-library';
 
 const { VITE_SPREADSHEET_ID: spreadsheetId, VITE_SHEET_NAME: sheetName } = import.meta.env;
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function GET() {
-	const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values:batchGet?ranges=${sheetName}!A2:E31&ranges=${sheetName}!G2:G7`;
+	let credentials: Credentials;
+	try {
+		credentials = await auth();
+	} catch {
+		return {
+			status: 500,
+			body: new Error('Authorization failed')
+		};
+	}
 
 	try {
-		const credentials = await auth();
-		const response = await fetch(url, {
-			headers: {
-				Authorization: 'Bearer ' + credentials.access_token
-			}
-		});
-
-		return {
-			status: 200,
-			headers: {
-				'access-control-allow-origin': '*'
-			},
-			body: {
-				valueRanges: response.ok && (await response.json()).valueRanges,
-				credentials
-			}
-		};
+		return getSpreadsheet({ spreadsheetId, sheetName, credentials });
 	} catch {
 		return {
 			status: 500,

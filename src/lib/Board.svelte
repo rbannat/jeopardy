@@ -1,22 +1,12 @@
 <script lang="ts">
-	import Button from './Button.svelte';
 	import type { Question, TransformedSpreadsheetData } from '../types/spreadsheetData.type';
-	import { fade } from 'svelte/transition';
-	import { marked } from 'marked';
-	import DOMPurify from 'dompurify';
-	import Overlay from './Overlay.svelte';
+	import { generateTableRows } from './api/transform-spreadsheet-data';
+	import { selectedQuestion, transformOrigin } from '../stores';
 
 	export let values: TransformedSpreadsheetData = { categories: [], questions: [] };
-	export let updateSpreadsheet: (values: string[][]) => Promise<{
-		status: number;
-	}>;
 
 	$: ({ categories, questions } = values);
-
-	$: rows = generateTableRows(questions);
-
-	let selectedQuestion: Question | null = null;
-	let transformOrigin = '50% 50%';
+	$: rows = generateTableRows({ categories, questions });
 
 	function handleQuestionClick(
 		event: MouseEvent & {
@@ -26,59 +16,8 @@
 	) {
 		const x = event.clientX;
 		const y = event.clientY;
-		transformOrigin = `${x}px ${y}px`;
-		selectedQuestion = question;
-	}
-
-	function transpose(array: Question[][]) {
-		return array[0].map((_, colIndex) => array.map((row) => row[colIndex]));
-	}
-
-	function generateTableRows(questions: TransformedSpreadsheetData['questions']): Question[][] {
-		let rows: Question[][] = [[]];
-
-		for (let question of questions) {
-			const categoryIndex = categories.indexOf(question.category);
-			rows[categoryIndex] = [...(rows[categoryIndex] ? rows[categoryIndex] : []), question];
-		}
-
-		return transpose(rows);
-	}
-
-	function transformToValueRange(questions: Question[]): string[][] {
-		return questions.map(({ category, amount, question, answer, answered }) => [
-			category,
-			amount.toString(),
-			question,
-			answer,
-			answered ? 'TRUE' : 'FALSE'
-		]);
-	}
-
-	function showAnswer(question: Question | null) {
-		if (!question) {
-			return;
-		}
-		question.answered = true;
-		// Update current question
-		selectedQuestion = question;
-		// Update store
-		values = { categories, questions };
-		const valueRange = transformToValueRange(questions);
-		updateSpreadsheet(valueRange);
-	}
-
-	function reset(question: Question | null) {
-		if (!question) {
-			return;
-		}
-		question.answered = false;
-		// Update current question
-		selectedQuestion = question;
-		// update store
-		values = { categories, questions };
-		const valueRange = transformToValueRange(questions);
-		updateSpreadsheet(valueRange);
+		transformOrigin.set(`${x}px ${y}px`);
+		selectedQuestion.set(question);
 	}
 </script>
 
@@ -109,33 +48,6 @@
 		{/each}
 	</tbody>
 </table>
-
-{#if selectedQuestion}
-	<Overlay {transformOrigin} on:close={() => (selectedQuestion = null)}>
-		<div class="prose prose-invert">
-			{@html marked(DOMPurify.sanitize(selectedQuestion.question))}
-		</div>
-
-		<div slot="overlay-ctas">
-			{#if selectedQuestion.answered}
-				<Button on:click={() => reset(selectedQuestion)}>Reset</Button>
-			{/if}
-		</div>
-
-		{#if !selectedQuestion.answered}
-			<div class="mt-6">
-				<Button on:click={() => showAnswer(selectedQuestion)}>Show answer</Button>
-			</div>
-		{:else}
-			<div class="flex flex-col items-center prose prose-invert mt-6" in:fade>
-				<h3>Answer</h3>
-				<div class="prose prose-invert">
-					{@html marked(DOMPurify.sanitize(selectedQuestion.answer))}
-				</div>
-			</div>
-		{/if}
-	</Overlay>
-{/if}
 
 <style>
 	.jp-board-card-body {

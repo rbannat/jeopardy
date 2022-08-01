@@ -7,10 +7,5 @@ export async function auth(): Promise<Credentials> {
 		key: process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
 		scopes: ['https://www.googleapis.com/auth/spreadsheets']
 	});
-	try {
-		const credentials = await client.authorize();
-		return credentials;
-	} catch {
-		throw new Error('Authorization failed');
-	}
+	return client.authorize();
 }

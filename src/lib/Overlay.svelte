@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { quintOut } from 'svelte/easing';
+	import { transformOrigin } from '../stores.js';
 
 	import { fade, scale } from 'svelte/transition';
 	import Button from './Button.svelte';
-
-	export let transformOrigin: string;
 
 	const dispatch = createEventDispatcher();
 
@@ -16,7 +15,7 @@
 
 <div
 	class="jp-overlay absolute m-0 w-screen h-screen top-0 left-0"
-	style:transform-origin={transformOrigin}
+	style:transform-origin={$transformOrigin}
 	in:scale={{ duration: 500, delay: 0, opacity: 0.5, start: 0.2, easing: quintOut }}
 	out:fade
 >
