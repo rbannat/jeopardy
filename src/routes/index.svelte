@@ -61,14 +61,16 @@
 
 {#if $selectedQuestion}
 	<Overlay on:close={() => selectedQuestion.set(null)}>
-		<div class="prose prose-invert">
-			{@html marked(DOMPurify.sanitize($selectedQuestion?.question || ''))}
-		</div>
-
 		<div slot="overlay-ctas">
 			{#if $selectedQuestion?.answered}
 				<Button on:click={() => reset($selectedQuestion)}>Reset</Button>
 			{/if}
+		</div>
+
+		<div class="mb-4">{$selectedQuestion.category}</div>
+
+		<div class="prose prose-invert">
+			{@html marked(DOMPurify.sanitize($selectedQuestion?.question || ''))}
 		</div>
 
 		{#if !$selectedQuestion?.answered}
